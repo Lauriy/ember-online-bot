@@ -1,0 +1,5 @@
+PyAutoGUI==0.9.33
+SendKeys==0.3
+Pillow==4.0.0
+python-dotenv==0.6.3
+pywin32==220

@@ -1,3 +1,7 @@
-Works with my won in Bityrn
+Ember Online arena bot. Tested in Bityrn, Turenyara.
 
-Only supervised use so far
+Relies on the /meditate skill (monk).
+
+Assumes presence of announcer.
+
+Install requirements, create your own .env file before running.

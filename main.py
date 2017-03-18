@@ -1,3 +1,4 @@
+import os
 import time
 import win32gui
 import win32ui
@@ -5,27 +6,27 @@ import win32ui
 import SendKeys
 import pyautogui
 from PIL import ImageGrab
+from dotenv import find_dotenv
+from dotenv import load_dotenv
 
-CHARACTER_NAME = 'Lorkhan'
+load_dotenv(find_dotenv())
 
-# Absolute coordinates on my 1920x1200 screen
-GAME_TOP_X = 559
-GAME_TOP_Y = 246
-GAME_BOTTOM_X = 1360
-GAME_BOTTOM_Y = 906
+CHARACTER_NAME = os.environ.get("CHARACTER_NAME")
+
+GAME_TOP_X = int(os.environ.get("GAME_TOP_X"))
+GAME_TOP_Y = int(os.environ.get("GAME_TOP_Y"))
+GAME_BOTTOM_X = int(os.environ.get("GAME_BOTTOM_X"))
+GAME_BOTTOM_Y = int(os.environ.get("GAME_BOTTOM_Y"))
 
 # Relative coordinates
 HEALTH_BAR_START_X = 46
 HEALTH_BAR_END_X = 200
 HEALTH_BAR_CENTER_Y = 299
-
 ACTION_BAR_START_X = 447
 ACTION_BAR_END_X = 600
-
 FIRST_ENEMY_OR_PLAYER_X = 665
-# Possible announcer 94 / 130
-FIRST_ENEMY_OR_PLAYER_Y = 130
-
+# Announcer at 92
+FIRST_ENEMY_OR_PLAYER_Y = 128
 MAX_ENEMY_PLAYER_SCAN_Y = 415
 
 # Pixel steps for loops
@@ -42,6 +43,8 @@ ACTION_BAR_FULL_COLOR = (0, 85, 0)
 # Thresholds
 MIN_HEALTH_PERCENTAGE = 20
 HEALED_PERCENTAGE = 90
+
+ARENA_DIRECTION = os.environ.get("ARENA_DIRECTION")
 
 
 # TODO: Pick up items
@@ -62,7 +65,7 @@ class EmberOnline:
     def grab_screen(self):
         box = (GAME_TOP_X, GAME_TOP_Y, GAME_BOTTOM_X, GAME_BOTTOM_Y)
         self.screen_grab = ImageGrab.grab(box)
-        # self.screen_grab.save(os.getcwd() + '\\snap__' + str(int(time.time())) + '.png', 'PNG')
+        #self.screen_grab.save(os.getcwd() + '\\snap__' + str(int(time.time())) + '.png', 'PNG')
 
     def get_health_percentage(self):
         # TODO: Better percentage reporting (currently says 10 at 20)
@@ -92,22 +95,26 @@ class EmberOnline:
         return 0
 
     def update_numbers_of_characters_in_current_tile(self):
-        # TODO: Multi pixel enemy scan with better tolerances
         current_y = FIRST_ENEMY_OR_PLAYER_Y
         self.look_around()
         self.player_count, self.enemy_count, self.npc_count = 0, 0, 0
         while current_y < MAX_ENEMY_PLAYER_SCAN_Y:
-            current_pixel = self.screen_grab.getpixel((FIRST_ENEMY_OR_PLAYER_X, current_y))
-            # print current_pixel
-            # ~(204, 134, 175)
-            if current_pixel[0] > 190 and current_pixel[1] > 130 and current_pixel[2] > 160:
-                self.npc_count += 1
-            # ~(0, 240, 53)
-            elif current_pixel[0] > 240 and current_pixel[1] > 230 and current_pixel[2] > 50:
-                self.player_count += 1
-            # ~(255, 255, 0)
-            elif current_pixel[0] > 240 and current_pixel[1] > 199 and current_pixel[2] < 100:
-                self.enemy_count += 1
+            for i in range(0, 40):
+                current_pixel = self.screen_grab.getpixel(((FIRST_ENEMY_OR_PLAYER_X + 1 * i), current_y))
+                # ~(0, 240, 53)
+                if current_pixel[0] == 0 and current_pixel[1] == 255:
+                    # Distinctive player green
+                    self.player_count += 1
+                    break
+                # ~(255, 255, 0)
+                elif current_pixel[0] == 255 and current_pixel[1] == 255:
+                    # Distinctive enemy yellow
+                    self.enemy_count += 1
+                    break
+                # ~(204, 134, 175)
+                elif current_pixel[0] > 190 and current_pixel[1] > 130 and current_pixel[2] > 160:
+                    self.npc_count += 1
+                    break
             current_y += ENEMY_OR_PLAYER_STEP
 
     def look_around(self):
@@ -115,15 +122,22 @@ class EmberOnline:
         time.sleep(0.5)
 
     def meditate(self):
-        # /meditate
         SendKeys.SendKeys('+?meditate{ENTER}', pause=0.005)
 
     def escape_arena(self):
-        SendKeys.SendKeys('n{ENTER}', pause=0.005)
+        if ARENA_DIRECTION == 'n':
+            escape_direction = 's'
+        elif ARENA_DIRECTION == 'e':
+            escape_direction = 'w'
+        elif ARENA_DIRECTION == 'w':
+            escape_direction = 'e'
+        else:
+            escape_direction = 's'
+        SendKeys.SendKeys(escape_direction + '{ENTER}', pause=0.005)
         self.is_in_arena = False
 
     def back_to_arena(self):
-        SendKeys.SendKeys('s{ENTER}', pause=0.005)
+        SendKeys.SendKeys(ARENA_DIRECTION + '{ENTER}', pause=0.005)
         self.is_in_arena = True
 
     def pull_chain(self):
@@ -135,11 +149,11 @@ class EmberOnline:
         current_first_enemy_y = FIRST_ENEMY_OR_PLAYER_Y + self.player_count * ENEMY_OR_PLAYER_STEP + self.npc_count * ENEMY_OR_PLAYER_STEP
         # Ugly Announcer workaround for now
         for i in range(0, 5):
-            pyautogui.click(GAME_TOP_X + FIRST_ENEMY_OR_PLAYER_X,
-                            GAME_TOP_Y + current_first_enemy_y - ENEMY_OR_PLAYER_STEP)
+            pyautogui.click(GAME_TOP_X + FIRST_ENEMY_OR_PLAYER_X, GAME_TOP_Y + current_first_enemy_y)
             time.sleep(0.1)
         for i in range(0, 5):
-            pyautogui.click(GAME_TOP_X + FIRST_ENEMY_OR_PLAYER_X, GAME_TOP_Y + current_first_enemy_y)
+            pyautogui.click(GAME_TOP_X + FIRST_ENEMY_OR_PLAYER_X,
+                            GAME_TOP_Y + current_first_enemy_y - ENEMY_OR_PLAYER_STEP)
             time.sleep(0.1)
         for i in range(0, 5):
             pyautogui.click(GAME_TOP_X + FIRST_ENEMY_OR_PLAYER_X,
@@ -156,11 +170,15 @@ class EmberOnline:
             print 'Low on health, escaping arena'
             self.escape_arena()
         elif current_health_percentage < HEALED_PERCENTAGE and not self.is_in_arena:
-            # TODO: Correct meditation seconds, stop meditating if healed early
             print 'Healing...'
-            time.sleep(9)
+            time.sleep(8)
             self.meditate()
-            time.sleep(15)
+            checks = 0
+            while current_health_percentage < HEALED_PERCENTAGE and checks < 5:
+                time.sleep(3)
+                checks += 1
+                self.grab_screen()
+                current_health_percentage = self.get_health_percentage()
         elif current_health_percentage >= HEALED_PERCENTAGE and not self.is_in_arena:
             print 'Healed and not in arena, heading back'
             self.back_to_arena()
