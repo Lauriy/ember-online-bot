@@ -25,8 +25,9 @@ HEALTH_BAR_CENTER_Y = 299
 ACTION_BAR_START_X = 447
 ACTION_BAR_END_X = 600
 FIRST_ENEMY_OR_PLAYER_X = 665
-# Announcer at 92
-FIRST_ENEMY_OR_PLAYER_Y = 128
+# Announcer at 92, next slot 128
+# FIRST_ENEMY_OR_PLAYER_Y = 128
+FIRST_ENEMY_OR_PLAYER_Y = 92
 MAX_ENEMY_PLAYER_SCAN_Y = 415
 
 # Pixel steps for loops
@@ -137,7 +138,7 @@ class EmberOnline:
         self.is_in_arena = False
 
     def back_to_arena(self):
-        SendKeys.SendKeys(ARENA_DIRECTION + '{ENTER}', pause=0.005)
+        SendKeys.SendKeys(str(ARENA_DIRECTION) + '{ENTER}', pause=0.005)
         self.is_in_arena = True
 
     def pull_chain(self):
