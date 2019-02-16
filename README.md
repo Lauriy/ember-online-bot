@@ -8,3 +8,5 @@ Requires Python 2.7, pywin32 can be retrieved from:
 https://sourceforge.net/projects/pywin32/files/pywin32/Build%20220/pywin32-220.win32-py2.7.exe/download
 
 Install requirements, create your own .env file before running.
+
+If SendKeys refuses to install, get it from https://www.lfd.uci.edu/~gohlke/pythonlibs/#sendkeys

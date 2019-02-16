@@ -17,17 +17,18 @@ GAME_TOP_X = int(os.environ.get("GAME_TOP_X"))
 GAME_TOP_Y = int(os.environ.get("GAME_TOP_Y"))
 GAME_BOTTOM_X = int(os.environ.get("GAME_BOTTOM_X"))
 GAME_BOTTOM_Y = int(os.environ.get("GAME_BOTTOM_Y"))
+ANNOUNCER_PRESENT = int(os.environ.get("ANNOUNCER_PRESENT"))
 
 # Relative coordinates
-HEALTH_BAR_START_X = 46
-HEALTH_BAR_END_X = 200
-HEALTH_BAR_CENTER_Y = 299
-ACTION_BAR_START_X = 447
-ACTION_BAR_END_X = 600
-FIRST_ENEMY_OR_PLAYER_X = 665
+HEALTH_BAR_START_X = 40
+HEALTH_BAR_END_X = 236
+HEALTH_BAR_CENTER_Y = 305
+ACTION_BAR_START_X = 508
+ACTION_BAR_END_X = 704
+FIRST_ENEMY_OR_PLAYER_X = 764
 # Announcer at 92, next slot 128
 # FIRST_ENEMY_OR_PLAYER_Y = 128
-FIRST_ENEMY_OR_PLAYER_Y = 92
+FIRST_ENEMY_OR_PLAYER_Y = 58
 MAX_ENEMY_PLAYER_SCAN_Y = 415
 
 # Pixel steps for loops
@@ -38,8 +39,8 @@ ACTION_BAR_CHECK_STEP = int((ACTION_BAR_END_X - ACTION_BAR_START_X) / (100 / ACT
 ENEMY_OR_PLAYER_STEP = 36
 
 # Colours
-HEALTH_BAR_FULL_COLOR = (85, 0, 0)
-ACTION_BAR_FULL_COLOR = (0, 85, 0)
+HEALTH_BAR_FULL_COLOR = (175, 0, 0)
+ACTION_BAR_FULL_COLOR = (0, 175, 0)
 
 # Thresholds
 MIN_HEALTH_PERCENTAGE = 20
@@ -56,8 +57,7 @@ class EmberOnline:
         self.window_handle = win32ui.FindWindow(None, u"Ember Online - %s" % CHARACTER_NAME).GetSafeHwnd()
         self.is_in_arena = False
         self.player_count = 0
-        self.enemy_count = 0
-        self.npc_count = 0
+        self.enemy_or_npc_count = 0
         win32gui.SetForegroundWindow(self.window_handle)
         time.sleep(0.5)
         # Switch mouse to attack mode
@@ -66,7 +66,7 @@ class EmberOnline:
     def grab_screen(self):
         box = (GAME_TOP_X, GAME_TOP_Y, GAME_BOTTOM_X, GAME_BOTTOM_Y)
         self.screen_grab = ImageGrab.grab(box)
-        #self.screen_grab.save(os.getcwd() + '\\snap__' + str(int(time.time())) + '.png', 'PNG')
+        # self.screen_grab.save(os.getcwd() + '\\snap__' + str(int(time.time())) + '.png', 'PNG')
 
     def get_health_percentage(self):
         # TODO: Better percentage reporting (currently says 10 at 20)
@@ -98,23 +98,19 @@ class EmberOnline:
     def update_numbers_of_characters_in_current_tile(self):
         current_y = FIRST_ENEMY_OR_PLAYER_Y
         self.look_around()
-        self.player_count, self.enemy_count, self.npc_count = 0, 0, 0
+        self.player_count, self.enemy_or_npc_count = 0, 0
         while current_y < MAX_ENEMY_PLAYER_SCAN_Y:
             for i in range(0, 40):
                 current_pixel = self.screen_grab.getpixel(((FIRST_ENEMY_OR_PLAYER_X + 1 * i), current_y))
-                # ~(0, 240, 53)
+                # ~(0, 255, 0)
                 if current_pixel[0] == 0 and current_pixel[1] == 255:
                     # Distinctive player green
                     self.player_count += 1
                     break
                 # ~(255, 255, 0)
                 elif current_pixel[0] == 255 and current_pixel[1] == 255:
-                    # Distinctive enemy yellow
-                    self.enemy_count += 1
-                    break
-                # ~(204, 134, 175)
-                elif current_pixel[0] > 190 and current_pixel[1] > 130 and current_pixel[2] > 160:
-                    self.npc_count += 1
+                    # Enemy/announcer yellow
+                    self.enemy_or_npc_count += 1
                     break
             current_y += ENEMY_OR_PLAYER_STEP
 
@@ -147,7 +143,7 @@ class EmberOnline:
 
     def attack_first_enemy(self):
         # TODO: Handle Announcer gracefully
-        current_first_enemy_y = FIRST_ENEMY_OR_PLAYER_Y + self.player_count * ENEMY_OR_PLAYER_STEP + self.npc_count * ENEMY_OR_PLAYER_STEP
+        current_first_enemy_y = FIRST_ENEMY_OR_PLAYER_Y + self.player_count * ENEMY_OR_PLAYER_STEP + (ENEMY_OR_PLAYER_STEP if ANNOUNCER_PRESENT else 0)
         # Ugly Announcer workaround for now
         for i in range(0, 5):
             pyautogui.click(GAME_TOP_X + FIRST_ENEMY_OR_PLAYER_X, GAME_TOP_Y + current_first_enemy_y)
@@ -186,8 +182,8 @@ class EmberOnline:
         elif current_health_percentage > MIN_HEALTH_PERCENTAGE and self.is_in_arena and current_action_percentage > 0:
             print 'Scanning for enemies...'
             self.update_numbers_of_characters_in_current_tile()
-            print 'Found %i enemies, %i players, %i npcs' % (self.enemy_count, self.player_count, self.npc_count)
-            if self.enemy_count == 0:
+            print 'Found %i enemies or NPCs, %i players' % (self.enemy_or_npc_count, self.player_count)
+            if (ANNOUNCER_PRESENT and self.enemy_or_npc_count == 1) or (not ANNOUNCER_PRESENT and self.enemy_or_npc_count == 0):
                 print 'Pulling chain...'
                 self.pull_chain()
             else:
