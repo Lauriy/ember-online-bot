@@ -20,10 +20,10 @@ GAME_BOTTOM_Y = int(os.environ.get("GAME_BOTTOM_Y"))
 ANNOUNCER_PRESENT = int(os.environ.get("ANNOUNCER_PRESENT"))
 
 # Relative coordinates
-HEALTH_BAR_START_X = 40
+HEALTH_BAR_START_X = 42
 HEALTH_BAR_END_X = 236
 HEALTH_BAR_CENTER_Y = 305
-ACTION_BAR_START_X = 508
+ACTION_BAR_START_X = 506
 ACTION_BAR_END_X = 704
 FIRST_ENEMY_OR_PLAYER_X = 764
 # Announcer at 92, next slot 128
@@ -129,7 +129,7 @@ class EmberOnline:
         elif ARENA_DIRECTION == 'w':
             escape_direction = 'e'
         else:
-            escape_direction = 's'
+            escape_direction = 'n'
         SendKeys.SendKeys(escape_direction + '{ENTER}', pause=0.005)
         self.is_in_arena = False
 
@@ -168,7 +168,7 @@ class EmberOnline:
             self.escape_arena()
         elif current_health_percentage < HEALED_PERCENTAGE and not self.is_in_arena:
             print 'Healing...'
-            time.sleep(8)
+            time.sleep(9)
             self.meditate()
             checks = 0
             while current_health_percentage < HEALED_PERCENTAGE and checks < 5:
