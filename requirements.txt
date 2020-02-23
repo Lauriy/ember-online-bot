@@ -1,5 +1,4 @@
 PyAutoGUI
-SendKeys
 Pillow
 python-dotenv
-pywin32
+keyboard

@@ -3,7 +3,6 @@ import time
 import win32gui
 import win32ui
 
-import SendKeys
 import pyautogui
 from PIL import ImageGrab
 from dotenv import find_dotenv
@@ -11,36 +10,38 @@ from dotenv import load_dotenv
 
 load_dotenv(find_dotenv())
 
-CHARACTER_NAME = os.environ.get("CHARACTER_NAME")
+CHARACTER_NAME = os.environ.get('CHARACTER_NAME')
+STANCE = os.environ.get('STANCE')
 
-GAME_TOP_X = int(os.environ.get("GAME_TOP_X"))
-GAME_TOP_Y = int(os.environ.get("GAME_TOP_Y"))
-GAME_BOTTOM_X = int(os.environ.get("GAME_BOTTOM_X"))
-GAME_BOTTOM_Y = int(os.environ.get("GAME_BOTTOM_Y"))
-ANNOUNCER_PRESENT = int(os.environ.get("ANNOUNCER_PRESENT"))
+GAME_TOP_X = int(os.environ.get('GAME_TOP_X'))
+GAME_TOP_Y = int(os.environ.get('GAME_TOP_Y'))
+GAME_BOTTOM_X = int(os.environ.get('GAME_BOTTOM_X'))
+GAME_BOTTOM_Y = int(os.environ.get('GAME_BOTTOM_Y'))
+ANNOUNCER_PRESENT = int(os.environ.get('ANNOUNCER_PRESENT'))
+
+# Colours
+HEALTH_BAR_FULL_COLOR = (175, 0, 0)
+ACTION_BAR_FULL_COLOR = (0, 175, 0)
 
 # Relative coordinates
-HEALTH_BAR_START_X = 42
-HEALTH_BAR_END_X = 236
-HEALTH_BAR_CENTER_Y = 305
-ACTION_BAR_START_X = 506
-ACTION_BAR_END_X = 704
+HEALTH_BAR_START_X = 39
+HEALTH_BAR_END_X = 235
+HEALTH_BAR_CENTER_Y = 304
+# Pixel steps for loops
+HEALTH_BAR_PERCENTAGE_STEP = 5
+HEALTH_BAR_CHECK_STEP = int((HEALTH_BAR_END_X - HEALTH_BAR_START_X) / (100 / HEALTH_BAR_PERCENTAGE_STEP))
+
+ACTION_BAR_START_X = 507
+ACTION_BAR_END_X = 703
+ACTION_BAR_PERCENTAGE_STEP = 5
+ACTION_BAR_CHECK_STEP = int((ACTION_BAR_END_X - ACTION_BAR_START_X) / (100 / ACTION_BAR_PERCENTAGE_STEP))
+
 FIRST_ENEMY_OR_PLAYER_X = 764
 # Announcer at 92, next slot 128
 # FIRST_ENEMY_OR_PLAYER_Y = 128
 FIRST_ENEMY_OR_PLAYER_Y = 58
 MAX_ENEMY_PLAYER_SCAN_Y = 415
-
-# Pixel steps for loops
-HEALTH_BAR_PERCENTAGE_STEP = 5
-HEALTH_BAR_CHECK_STEP = int((HEALTH_BAR_END_X - HEALTH_BAR_START_X) / (100 / HEALTH_BAR_PERCENTAGE_STEP))
-ACTION_BAR_PERCENTAGE_STEP = 5
-ACTION_BAR_CHECK_STEP = int((ACTION_BAR_END_X - ACTION_BAR_START_X) / (100 / ACTION_BAR_PERCENTAGE_STEP))
 ENEMY_OR_PLAYER_STEP = 36
-
-# Colours
-HEALTH_BAR_FULL_COLOR = (175, 0, 0)
-ACTION_BAR_FULL_COLOR = (0, 175, 0)
 
 # Thresholds
 MIN_HEALTH_PERCENTAGE = 20
@@ -61,7 +62,9 @@ class EmberOnline:
         win32gui.SetForegroundWindow(self.window_handle)
         time.sleep(0.5)
         # Switch mouse to attack mode
-        SendKeys.SendKeys('^2{ENTER}', pause=0.005)
+        pyautogui.hotkey('ctrl', '2', interval=0.005)
+        pyautogui.typewrite('/stance ' + STANCE)
+        pyautogui.press('enter')
 
     def grab_screen(self):
         box = (GAME_TOP_X, GAME_TOP_Y, GAME_BOTTOM_X, GAME_BOTTOM_Y)
@@ -115,11 +118,13 @@ class EmberOnline:
             current_y += ENEMY_OR_PLAYER_STEP
 
     def look_around(self):
-        SendKeys.SendKeys('look{ENTER}', pause=0.005)
-        time.sleep(0.5)
+        pyautogui.typewrite('look')
+        pyautogui.press('enter')
+        # time.sleep(0.5)
 
     def meditate(self):
-        SendKeys.SendKeys('+?meditate{ENTER}', pause=0.005)
+        pyautogui.typewrite('/meditate')
+        pyautogui.press('enter')
 
     def escape_arena(self):
         if ARENA_DIRECTION == 'n':
@@ -130,16 +135,19 @@ class EmberOnline:
             escape_direction = 'e'
         else:
             escape_direction = 'n'
-        SendKeys.SendKeys(escape_direction + '{ENTER}', pause=0.005)
+        pyautogui.typewrite(escape_direction)
+        pyautogui.press('enter')
         self.is_in_arena = False
 
     def back_to_arena(self):
-        SendKeys.SendKeys(str(ARENA_DIRECTION) + '{ENTER}', pause=0.005)
+        pyautogui.typewrite(str(ARENA_DIRECTION))
+        pyautogui.press('enter')
         self.is_in_arena = True
 
     def pull_chain(self):
         # For new enemy
-        SendKeys.SendKeys('+?pull{SPACE}chain{ENTER}', pause=0.005)
+        pyautogui.typewrite('/pull chain')
+        pyautogui.press('enter')
 
     def attack_first_enemy(self):
         # TODO: Handle Announcer gracefully
@@ -158,16 +166,16 @@ class EmberOnline:
             time.sleep(0.1)
 
     def tick(self):
-        print 'Tick...'
+        print('Tick...')
         self.grab_screen()
         current_health_percentage = self.get_health_percentage()
         current_action_percentage = self.get_action_percentage()
-        print 'Health at %i, action at %i' % (current_health_percentage, current_action_percentage)
+        print('Health at %i, action at %i' % (current_health_percentage, current_action_percentage))
         if current_health_percentage <= MIN_HEALTH_PERCENTAGE and current_action_percentage > 0 and self.is_in_arena:
-            print 'Low on health, escaping arena'
+            print('Low on health, escaping arena')
             self.escape_arena()
         elif current_health_percentage < HEALED_PERCENTAGE and not self.is_in_arena:
-            print 'Healing...'
+            print('Healing...')
             time.sleep(9)
             self.meditate()
             checks = 0
@@ -177,17 +185,17 @@ class EmberOnline:
                 self.grab_screen()
                 current_health_percentage = self.get_health_percentage()
         elif current_health_percentage >= HEALED_PERCENTAGE and not self.is_in_arena:
-            print 'Healed and not in arena, heading back'
+            print('Healed and not in arena, heading back')
             self.back_to_arena()
         elif current_health_percentage > MIN_HEALTH_PERCENTAGE and self.is_in_arena and current_action_percentage > 0:
-            print 'Scanning for enemies...'
+            print('Scanning for enemies...')
             self.update_numbers_of_characters_in_current_tile()
-            print 'Found %i enemies or NPCs, %i players' % (self.enemy_or_npc_count, self.player_count)
+            print('Found %i enemies or NPCs, %i players' % (self.enemy_or_npc_count, self.player_count))
             if (ANNOUNCER_PRESENT and self.enemy_or_npc_count == 1) or (not ANNOUNCER_PRESENT and self.enemy_or_npc_count == 0):
-                print 'Pulling chain...'
+                print('Pulling chain...')
                 self.pull_chain()
             else:
-                print 'At least one enemy present, attacking'
+                print('At least one enemy present, attacking')
                 self.attack_first_enemy()
 
     def start(self):

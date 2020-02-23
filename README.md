@@ -1,10 +1,14 @@
-Ember Online arena bot. Tested in Bityrn, Turenyara.
+Ember Online arena bot. Tested in Bityrn, Turenyara, Fort Huldar.
 
 Relies on the /meditate skill (monk).
 
-Requires Python 2.7, pywin32 can be retrieved from:
-https://sourceforge.net/projects/pywin32/files/pywin32/Build%20220/pywin32-220.win32-py2.7.exe/download
+pywin32 can be retrieved from:
+https://github.com/mhammond/pywin32/releases/download/b227/pywin32-227.win-amd64-py3.8.exe
 
-Install requirements, create your own .env file before running.
+If using it, create your venv after installing pywin32 and 'inherit global site-packages'.
 
-If SendKeys refuses to install, get it from https://www.lfd.uci.edu/~gohlke/pythonlibs/#sendkeys
+Install requirements, create and edit your own .env file before running.
+
+`pip install -r requirements.txt`
+
+`cp .env.dist .env`
