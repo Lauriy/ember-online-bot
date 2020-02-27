@@ -26,7 +26,7 @@ ACTION_BAR_FULL_COLOR = (0, 175, 0)
 # Relative coordinates
 HEALTH_BAR_START_X = 39
 HEALTH_BAR_END_X = 235
-HEALTH_BAR_CENTER_Y = 304
+HEALTH_BAR_CENTER_Y = 305 # Could be 304
 # Pixel steps for loops
 HEALTH_BAR_PERCENTAGE_STEP = 5
 HEALTH_BAR_CHECK_STEP = int((HEALTH_BAR_END_X - HEALTH_BAR_START_X) / (100 / HEALTH_BAR_PERCENTAGE_STEP))
@@ -69,7 +69,7 @@ class EmberOnline:
     def grab_screen(self):
         box = (GAME_TOP_X, GAME_TOP_Y, GAME_BOTTOM_X, GAME_BOTTOM_Y)
         self.screen_grab = ImageGrab.grab(box)
-        # self.screen_grab.save(os.getcwd() + '\\snap__' + str(int(time.time())) + '.png', 'PNG')
+        # self.screen_grab.save(os.getcwd() + '\\snap_' + str(int(time.time())) + '.png', 'PNG')
 
     def get_health_percentage(self):
         # TODO: Better percentage reporting (currently says 10 at 20)
