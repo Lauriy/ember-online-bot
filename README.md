@@ -1,5 +1,3 @@
-[![Actions Status](https://github.com/{owner}/{repo}/workflows/{workflow_name}/badge.svg)](https://github.com/{owner}/{repo}/actions)
-
 # Ember Online arena bot
 Tested in Bityrn, Canopia, Turenyara, Fort Huldar.
 
