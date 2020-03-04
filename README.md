@@ -1,3 +1,5 @@
+![Python application](https://github.com/Lauriy/ember-online-bot/workflows/Python%20application/badge.svg)
+
 # Ember Online arena bot
 Tested in Bityrn, Canopia, Turenyara, Fort Huldar.
 
