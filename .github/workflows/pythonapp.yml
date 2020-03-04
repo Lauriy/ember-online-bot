@@ -16,6 +16,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+        easy_install -U -Z https://github.com/mhammond/pywin32/releases/download/b227/pywin32-227.win-amd64-py3.8.exe
         pip install -r requirements.txt
     - name: Lint with flake8
       run: |
