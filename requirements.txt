@@ -2,3 +2,4 @@ PyAutoGUI
 Pillow
 python-dotenv
 keyboard
+mypy
