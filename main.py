@@ -67,7 +67,7 @@ def enter_arena():
     if CHARACTER_CLASS == CLASS_CLERIC:
         pyautogui.typewrite('/c aegis self')
         pyautogui.press('enter')
-        time.sleep(0.5)
+        time.sleep(0.75)
     pyautogui.typewrite(ARENA_DIRECTION)
     pyautogui.press('enter')
     state.is_in_arena = True
@@ -102,7 +102,7 @@ def escape_arena():
 
 def pick_up_items():
     print('Picking up items')
-    pyautogui.click(GAME_TOP_X + FIRST_ITEM_X, GAME_TOP_Y + FIRST_ITEM_Y, clicks=state.item_count, interval=0.1)
+    pyautogui.click(GAME_TOP_X + FIRST_ITEM_X, GAME_TOP_Y + FIRST_ITEM_Y, clicks=state.item_count, interval=0.5)
 
 
 def launch_attacks():
@@ -116,20 +116,19 @@ def launch_attacks():
 
 def try_long_heal_routine():
     print('Trying long heal')
-    # FIXME: case when cleric has mana but not health
-    if not is_general_cooldown(state.screenshot):
-        # Monk meditates, cleric drinks
+    is_cooldown = is_general_cooldown(state.screenshot)
+    if CHARACTER_CLASS == CLASS_MONK and not is_cooldown:
         pyautogui.hotkey('F1')
-        rest_time = 14
-        time.sleep(rest_time)
-        if CHARACTER_CLASS == CLASS_CLERIC and state.current_health < HEALED_THRESHOLD:
-            pyautogui.hotkey('F3', 'F3', 'F3', 'F3', interval=0.25)
+        time.sleep(9)
+    elif CHARACTER_CLASS == CLASS_CLERIC and state.current_mana < MANA_THRESHOLD and not is_cooldown:
+        pyautogui.hotkey('F1')
+        time.sleep(16)
+    if CHARACTER_CLASS == CLASS_CLERIC and state.current_health < HEALED_THRESHOLD:
+        pyautogui.hotkey('F3')
+        pyautogui.hotkey('F3')
+        pyautogui.hotkey('F3')
+        pyautogui.hotkey('F3')
 
-
-def try_potion():
-    print('Trying potion')
-    if CHARACTER_CLASS == CLASS_CLERIC and state.current_mana < MANA_POTION_THRESHOLD:
-        pyautogui.hotkey('F2')
 
 
 def tick():
@@ -152,12 +151,13 @@ def tick():
             else:
                 pull_chain()
         else:
-            try_potion()
+            if CHARACTER_CLASS == CLASS_CLERIC and state.current_mana < MANA_POTION_THRESHOLD:
+                pyautogui.hotkey('F2')
             state.item_count = get_number_of_items_in_current_tile(state.screenshot)
             if state.item_count > 0:
                 pick_up_items()
     else:
-        if state.current_health <= HEALED_THRESHOLD or state.current_mana <= MANA_HEALED_THRESHOLD:
+        if state.current_health <= HEALTH_THRESHOLD or state.current_mana <= MANA_THRESHOLD:
             try_long_heal_routine()
         elif state.current_stamina > 0:
             enter_arena()
