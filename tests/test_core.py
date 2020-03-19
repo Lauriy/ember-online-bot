@@ -3,10 +3,10 @@ import os
 from PIL import Image
 
 from core import get_number_of_items_in_current_tile, get_number_of_characters_in_current_tile, get_health, get_mana, \
-    get_stamina, is_health_potion_cooldown, is_mana_potion_cooldown, is_general_cooldown
+    get_stamina, is_health_potion_cooldown, is_mana_potion_cooldown, is_general_cooldown, get_focus
 
 test_image_1 = Image.open(os.path.dirname(os.path.realpath(__file__)) + '/fixtures/snap_1583267560.png')
-
+test_image_2 = Image.open(os.path.dirname(os.path.realpath(__file__)) + '/fixtures/snap_1584648581.png')
 
 def test_detects_items():
     item_count = get_number_of_items_in_current_tile(test_image_1)
@@ -29,6 +29,10 @@ def test_detects_resources():
     assert health == 98
     assert mana == 100
     assert stamina == 47
+
+    focus = get_focus(test_image_2)
+
+    assert focus == 59
 
 
 def test_detects_cooldowns():

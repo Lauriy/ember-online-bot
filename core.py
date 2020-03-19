@@ -4,6 +4,7 @@ from PIL import Image
 
 CLASS_MONK = 'monk'
 CLASS_CLERIC = 'cleric'
+CLASS_MAGEBLADE = 'mageblade'
 
 
 def get_number_of_items_in_current_tile(screenshot: Image, first_item_x: int = 735, first_item_y: int = 520,
@@ -82,6 +83,11 @@ def get_mana(screenshot: Image, bar_start_x: int = 273, bar_end_x: int = 469, ba
 
 def get_stamina(screenshot: Image, bar_start_x: int = 507, bar_end_x: int = 703, bar_center_y: int = 305,
                 bar_full_colour: Tuple[int, int, int] = (0, 175, 0)):
+    return _get_resource_percentage(screenshot, bar_start_x, bar_end_x, bar_center_y, bar_full_colour)
+
+
+def get_focus(screenshot: Image, bar_start_x: int = 273, bar_end_x: int = 469, bar_center_y: int = 305,
+              bar_full_colour: Tuple[int, int, int] = (175, 175, 0)):
     return _get_resource_percentage(screenshot, bar_start_x, bar_end_x, bar_center_y, bar_full_colour)
 
 

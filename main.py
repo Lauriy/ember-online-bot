@@ -8,7 +8,7 @@ from PIL import ImageGrab, Image
 from dotenv import load_dotenv, find_dotenv
 
 from core import CLASS_MONK, CLASS_CLERIC, get_health, get_stamina, get_mana, is_general_cooldown, \
-    get_number_of_items_in_current_tile, get_number_of_characters_in_current_tile
+    get_number_of_items_in_current_tile, get_number_of_characters_in_current_tile, CLASS_MAGEBLADE
 
 load_dotenv(find_dotenv())
 
@@ -139,10 +139,20 @@ def tick():
     state.current_stamina = get_stamina(state.screenshot)
     state.current_mana = get_mana(state.screenshot)
     state.player_count, state.enemy_or_npc_count = get_number_of_characters_in_current_tile(state.screenshot)
+    print(state.player_count)
+    print(state.enemy_or_npc_count)
+    print(ANNOUNCER_PRESENT)
     if ANNOUNCER_PRESENT:
         state.enemy_or_npc_count -= 1
     if state.is_in_arena:
-        if (state.current_health <= HEALTH_THRESHOLD or state.current_mana <= MANA_THRESHOLD) \
+        if CHARACTER_CLASS == CLASS_MAGEBLADE and state.current_health < HEALTH_THRESHOLD and state.current_stamina > 0:
+            # Just self-heal, should be enough ad infinitum
+            pyautogui.hotkey('F3')
+            pyautogui.hotkey('F3')
+            pyautogui.hotkey('F3')
+            pyautogui.hotkey('F3')
+            pyautogui.hotkey('F3')
+        if (state.current_health < HEALTH_THRESHOLD or state.current_mana < MANA_THRESHOLD) \
                 and state.current_stamina > 0:
             escape_arena()
         elif state.current_stamina > 0:
@@ -157,7 +167,8 @@ def tick():
             if state.item_count > 0:
                 pick_up_items()
     else:
-        if state.current_health <= HEALTH_THRESHOLD or state.current_mana <= MANA_THRESHOLD:
+        if state.current_health < HEALTH_THRESHOLD or state.current_mana < MANA_THRESHOLD:
+            print('here')
             try_long_heal_routine()
         elif state.current_stamina > 0:
             enter_arena()
