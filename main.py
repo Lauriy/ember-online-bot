@@ -139,9 +139,6 @@ def tick():
     state.current_stamina = get_stamina(state.screenshot)
     state.current_mana = get_mana(state.screenshot)
     state.player_count, state.enemy_or_npc_count = get_number_of_characters_in_current_tile(state.screenshot)
-    print(state.player_count)
-    print(state.enemy_or_npc_count)
-    print(ANNOUNCER_PRESENT)
     if ANNOUNCER_PRESENT:
         state.enemy_or_npc_count -= 1
     if state.is_in_arena:
